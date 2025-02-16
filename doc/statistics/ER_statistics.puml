@@ -1,0 +1,45 @@
+@startuml
+entity Promocode {
+    +id: UUID
+    +created_at: Date
+    +creator_id: UUID 
+    +likes: Int
+    +comments: Int
+    +ctr: Double
+    +shared: Int
+}
+
+entity Comment {
+    +id: UUID
+    +promocode_id: UUID
+    +creator_id: UUID
+    +created_at: Date
+    +likes: Int
+    +dislikes: Int
+}
+
+entity User {
+    +id: UUID
+    +location: String
+    +registration_date: Date
+    +total_likes_on_comments: Int
+    +total_comments_left: Int
+    +total_likes_left: Int
+}
+
+entity Company {
+    +id: UUID
+    +user_ud: UUID
+    +promocodes_count: Int
+    +total_likes: Int
+    +total_comments: Int
+}
+
+Promocode ||--|{ Comment : имеет
+User ||--|{ Company : имеет
+User ||--|{ Comment : взаимодействует
+User ||--|{ Promocode : взаимодействует
+
+
+
+@enduml

@@ -1,0 +1,90 @@
+specification {
+    element actor
+    element system
+    element container
+    element database {
+        style {
+            shape storage
+        }
+    }
+    element queue {
+        style {
+            shape queue
+        }
+    }
+}
+
+model {
+    user = actor 'Client'
+    llty = system 'Loyalty platform' {
+        container ui 'UI'
+
+        container gateway 'Gateway'
+
+        container users 'User service' {
+            description 'Сервис пользователей, который отвечает за регистрацию и аутентификацию пользователей, а также хранит всю информацию по ним и их роли.'
+            technology 'Go'
+        }
+
+        container statistics 'Statistics service' {
+            description 'Сервис статистики для подсчета лайков, просмотров, комментариев.'
+            technology 'Go'
+        }
+
+        container promocodes 'Promocodes service' {
+            description 'Сервис промокодов и комментариев.'
+            technology 'Go'
+        }
+
+        database userDb 'User database' {
+            technology 'Postgres'
+        }
+
+        database statisticsDb 'User database' {
+            technology 'Clickhouse'
+        }
+
+        database promocodesDb 'Promocodes database' {
+            technology 'Postgres'
+        }
+
+        queue eventQueue 'Event queue' {
+            technology 'Kafka'
+        }
+
+
+        ui -> gateway "API request" "HTTP"
+        gateway -> users "API Request" "gRPC"
+        gateway -> promocodes "API Request" "gRPC"
+        gateway -> statistics "API Request" "gRPC"
+
+        users -> userDb "Читает/Пишет" "SQL"
+        promocodes -> promocodesDb "Читает/Пишет" "SQL"
+        statistics -> statisticsDb "Читает/Пишет" "SQL"
+
+        users -> eventQueue "Публикует" "user_event"
+        promocodes -> eventQueue "Публикует" "promocode_event"
+        statistics -> eventQueue "Подписывается" "user_event/promocode_event"
+
+    }
+
+
+    user -> ui 'Client communicates with system'
+}
+
+views {
+    view of llty {
+        include *
+    }
+    view of users {
+        include *
+    }
+
+    view of statistics {
+        include *
+    }
+
+    view of promocodes {
+        include *
+    }
+}

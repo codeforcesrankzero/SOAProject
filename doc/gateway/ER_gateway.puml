@@ -1,0 +1,31 @@
+@startuml
+entity ApiGateway {
+    +id: UUID
+    +path: String
+    +method: String
+    +service_name: String
+    +created_at: Date
+    +updated_at: Date
+}
+
+entity Config {
+    +id: UUID
+    +api_gateway_id: UUID
+    +max_requests_per_time: Int
+    +time_window: Int
+    +timeout_ms: Int
+    +retries: Int
+    +retry_timeout_ms
+}
+
+entity AuthToken {
+    +id: UUID
+    +user_id: UUID
+    +token: String
+    +expires_at: Date
+    +created_at: Data
+}
+
+ApiGateway ||--o{ Config : имеет
+ApiGateway ||--o{ AuthToken : управляет
+@enduml
