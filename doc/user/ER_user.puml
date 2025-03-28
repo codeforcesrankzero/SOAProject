@@ -1,0 +1,30 @@
+@startuml
+entity User {
+    +id: UUID
+    +username: String
+    +password_hash: String
+    +email: String
+    +role: String
+    +name: String
+    +birthday: Date
+}
+
+entity Company {
+    +id: UUID
+    +user_id: UUID
+    +description: String
+    +subscription_level: Int
+    +created_at: Date
+}
+
+entity Promocode {
+    +id: UUID
+    +company_id: UUID
+    +title: String
+    +date_created: Date
+    +type: String
+}
+
+User ||--|{ Company : имеет
+Company ||--|{ Promocode : имеет
+@enduml

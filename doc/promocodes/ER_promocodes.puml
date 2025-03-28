@@ -1,0 +1,35 @@
+@startuml
+entity Promocode {
+    +id: UUID
+    +title: String
+    +description: String
+    +created_at: Date
+    +company_id: UUID
+    +type: String
+    +is_moderates: String
+    +rating: Int
+}
+
+entity Comment {
+    +id: UUID
+    +craeted_at: Date
+    +promocode_id: UUID
+    +creator_id: UUID
+    +content: String
+    +created_at: Date
+    +is_moderated: Bool
+}
+
+entity Company {
+    +id: UUID
+    +name: String
+    +creator_id: UUID
+    +created_at: Date
+    +promocodes_count: Int
+    +is_moderated: Bool
+}
+
+Promocode ||--|{ Comment : имеет
+Company ||--|{ Promocode : имеет
+
+@enduml

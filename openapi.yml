@@ -1,0 +1,568 @@
+openapi: 3.0.0
+info:
+  title: API Gateway
+  description: Gateway API для сервисов пользователей и промокодов
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер разработки
+
+paths:
+  /register:
+    post:
+      summary: Регистрация нового пользователя
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Пользователь успешно зарегистрирован
+        '400':
+          description: Ошибка валидации или пользователь уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /login:
+    post:
+      summary: Аутентификация пользователя
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Ошибка аутентификации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /profile:
+    get:
+      summary: Получение данных профиля пользователя
+      operationId: getProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Данные профиля пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      summary: Обновление профиля пользователя
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Профиль успешно обновлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Профиль успешно обновлен
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/promocodes:
+    post:
+      summary: Создание нового промокода
+      operationId: createPromocode
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromocodeRequest'
+      responses:
+        '201':
+          description: Промокод успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromocodeResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    get:
+      summary: Получение списка промокодов с пагинацией
+      operationId: listPromocodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 1)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          description: Количество записей на странице
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Список промокодов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPromocodesResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/promocodes/{id}:
+    get:
+      summary: Получение промокода по ID
+      operationId: getPromocode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID промокода
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Данные промокода
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromocodeResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Нет доступа к этому промокоду
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Промокод не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      summary: Обновление промокода
+      operationId: updatePromocode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID промокода
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePromocodeRequest'
+      responses:
+        '200':
+          description: Промокод успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromocodeResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Нет прав на обновление этого промокода
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Промокод не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      summary: Удаление промокода
+      operationId: deletePromocode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID промокода
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Промокод успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePromocodeResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Нет прав на удаление этого промокода
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Промокод не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - login
+        - password
+        - email
+      properties:
+        login:
+          type: string
+          minLength: 4
+          maxLength: 20
+          example: user123
+        password:
+          type: string
+          minLength: 6
+          example: password123
+        email:
+          type: string
+          format: email
+          example: user@example.com
+    
+    LoginRequest:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: user123
+        password:
+          type: string
+          example: password123
+    
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: Иван
+        last_name:
+          type: string
+          example: Иванов
+        birth_date:
+          type: string
+          description: Дата рождения в формате YYYY-MM-DD
+          example: 1990-01-01
+        email:
+          type: string
+          format: email
+          example: ivan@example.com
+        phone:
+          type: string
+          example: "+7 (900) 123-45-67"
+    
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        login:
+          type: string
+          example: user123
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        first_name:
+          type: string
+          example: Иван
+        last_name:
+          type: string
+          example: Иванов
+        birth_date:
+          type: string
+          format: date-time
+          example: 1990-01-01T00:00:00Z
+        phone:
+          type: string
+          example: "+7 (900) 123-45-67"
+        created_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+    
+    CreatePromocodeRequest:
+      type: object
+      required:
+        - name
+        - code
+        - discount
+      properties:
+        name:
+          type: string
+          example: "Праздничная скидка"
+          description: Название промокода
+        description:
+          type: string
+          example: "Скидка на все товары к 8 марта"
+          description: Описание промокода
+        discount:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 15.5
+          description: Размер скидки (%)
+        code:
+          type: string
+          example: "SPRING2023"
+          description: Код промокода для активации
+    
+    UpdatePromocodeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Обновленная скидка"
+        description:
+          type: string
+          example: "Обновленное описание скидки"
+        discount:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 20.0
+        code:
+          type: string
+          example: "UPDATED2023"
+    
+    PromocodeResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Праздничная скидка"
+        description:
+          type: string
+          example: "Скидка на все товары к 8 марта"
+        creator_id:
+          type: integer
+          format: int64
+          example: 123
+        discount:
+          type: number
+          format: float
+          example: 15.5
+        code:
+          type: string
+          example: "SPRING2023"
+        created_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+    
+    DeletePromocodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Промокод успешно удален"
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Праздничная скидка"
+        description:
+          type: string
+          example: "Скидка на все товары к 8 марта"
+        creator_id:
+          type: integer
+          format: int64
+          example: 123
+        discount:
+          type: number
+          format: float
+          example: 15.5
+        code:
+          type: string
+          example: "SPRING2023"
+        created_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2023-01-01T12:00:00Z
+    
+    ListPromocodesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromocodeResponse'
+        total:
+          type: integer
+          format: int32
+          example: 42
+          description: Общее количество промокодов
+        page:
+          type: integer
+          format: int32
+          example: 1
+          description: Текущая страница
+        per_page:
+          type: integer
+          format: int32
+          example: 10
+          description: Количество записей на странице
+    
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Ошибка валидации"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
