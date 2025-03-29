@@ -1,0 +1,28 @@
+FROM golang:1.19-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git protobuf-dev
+
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+
+ENV PATH="$PATH:$(go env GOPATH)/bin"
+
+COPY . .
+
+RUN protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    pkg/grpc/promocode.proto
+
+RUN go mod download
+RUN go mod tidy
+RUN go build -o grpc-service ./cmd/grpc/main.go
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/grpc-service .
+
+CMD ["./grpc-service"]

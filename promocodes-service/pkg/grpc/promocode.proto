@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package promocode;
+option go_package = "promocodes-service/pkg/grpc";
+
+service PromocodeService {
+  rpc CreatePromocode(CreatePromocodeRequest) returns (PromocodeResponse) {}
+  rpc GetPromocode(GetPromocodeRequest) returns (PromocodeResponse) {}
+  rpc UpdatePromocode(UpdatePromocodeRequest) returns (PromocodeResponse) {}
+  rpc DeletePromocode(DeletePromocodeRequest) returns (DeletePromocodeResponse) {}
+  rpc ListPromocodes(ListPromocodesRequest) returns (ListPromocodesResponse) {}
+}
+
+message CreatePromocodeRequest {
+  string name = 1;
+  string description = 2;
+  int64 creator_id = 3;
+  float discount = 4;
+  string code = 5;
+}
+
+message GetPromocodeRequest {
+  int64 id = 1;
+}
+
+message UpdatePromocodeRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  float discount = 4;
+  string code = 5;
+  int64 creator_id = 6;
+}
+
+message DeletePromocodeRequest {
+  int64 id = 1;
+  int64 creator_id = 2;
+}
+
+message DeletePromocodeResponse {
+  bool success = 1;
+  string message = 2;
+  int64 id = 3;
+  string name = 4;
+  string description = 5;
+  int64 creator_id = 6;
+  float discount = 7;
+  string code = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message PromocodeResponse {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 creator_id = 4;
+  float discount = 5;
+  string code = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message ListPromocodesRequest {
+  int32 page = 1;
+  int32 per_page = 2;
+}
+
+message ListPromocodesResponse {
+  repeated PromocodeResponse promocodes = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 per_page = 4;
+}
